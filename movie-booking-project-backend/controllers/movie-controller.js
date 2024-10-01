@@ -2,94 +2,104 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import Admin from "../models/Admin";
 import Movie from "../models/Movie";
-export const addMovie = async (req, res, next) => {
-  const extractedToken = req.headers.authorization.split(" ")[1];
-  if (!extractedToken && extractedToken.trim() === "") {
+
+// Middleware for verifying admin token
+const verifyAdminToken = async (req, res, next) => {
+  const authorizationHeader = req.headers.authorization;
+  if (!authorizationHeader) {
     return res.status(404).json({ message: "Token Not Found" });
   }
 
-  let adminId;
+  const extractedToken = authorizationHeader.split(" ")[1];
+  if (!extractedToken || extractedToken.trim() === "") {
+    return res.status(404).json({ message: "Invalid Token" });
+  }
 
-  // verify token
-  jwt.verify(extractedToken, process.env.SECRET_KEY, (err, decrypted) => {
-    if (err) {
-      return res.status(400).json({ message: `${err.message}` });
-    } else {
-      adminId = decrypted.id;
-      return;
+  try {
+    const decrypted = jwt.verify(extractedToken, process.env.SECRET_KEY);
+    req.adminId = decrypted.id; // Attach adminId to request object for later use
+    next(); // Proceed to the next middleware/handler
+  } catch (err) {
+    return res.status(400).json({ message: `Token Verification Failed: ${err.message}` });
+  }
+};
+
+// Add a new movie
+export const addMovie = async (req, res) => {
+  const { title, description, releaseDate, posterUrl, featured, actors } = req.body;
+
+  // Check if admin exists
+  let adminUser;
+  try {
+    adminUser = await Admin.findById(req.adminId);
+    if (!adminUser) {
+      return res.status(404).json({ message: "Admin not found" });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({ message: "Fetching admin failed" });
+  }
 
-  //create new movie
-  const { title, description, releaseDate, posterUrl, featured, actors } =
-    req.body;
-  if (
-    !title &&
-    title.trim() === "" &&
-    !description &&
-    description.trim() == "" &&
-    !posterUrl &&
-    posterUrl.trim() === ""
-  ) {
+  // Validate movie inputs
+  if (!title || !description || !posterUrl || title.trim() === "" || description.trim() === "" || posterUrl.trim() === "") {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
 
   let movie;
   try {
     movie = new Movie({
+      title,
       description,
-      releaseDate: new Date(`${releaseDate}`),
+      releaseDate: new Date(releaseDate),
+      posterUrl,
       featured,
       actors,
-      admin: adminId,
-      posterUrl,
-      title,
+      admin: req.adminId,
     });
+
+    // Start a transaction
     const session = await mongoose.startSession();
-    const adminUser = await Admin.findById(adminId);
     session.startTransaction();
+
     await movie.save({ session });
     adminUser.addedMovies.push(movie);
     await adminUser.save({ session });
+
     await session.commitTransaction();
+    session.endSession();
   } catch (err) {
-    return console.log(err);
+    return res.status(500).json({ message: "Saving movie failed", error: err.message });
   }
 
-  if (!movie) {
-    return res.status(500).json({ message: "Request Failed" });
-  }
-
-  return res.status(201).json({ movie });
+  return res.status(201).json({ movie }); // Return the newly created movie
 };
 
-export const getAllMovies = async (req, res, next) => {
-  let movies;
-
+// Get all movies
+export const getAllMovies = async (req, res) => {
   try {
-    movies = await Movie.find();
+    const movies = await Movie.find();
+    if (!movies || movies.length === 0) {
+      return res.status(404).json({ message: "No Movies Found" });
+    }
+    return res.status(200).json({ movies });
   } catch (err) {
-    return console.log(err);
+    return res.status(500).json({ message: "Fetching movies failed", error: err.message });
   }
-
-  if (!movies) {
-    return res.status(500).json({ message: "Request Failed" });
-  }
-  return res.status(200).json({ movies });
 };
 
-export const getMovieById = async (req, res, next) => {
+// Get movie by ID
+export const getMovieById = async (req, res) => {
   const id = req.params.id;
-  let movie;
+
   try {
-    movie = await Movie.findById(id);
+    const movie = await Movie.findById(id);
+    if (!movie) {
+      return res.status(404).json({ message: "Invalid Movie ID" });
+    }
+    return res.status(200).json({ movie });
   } catch (err) {
-    return console.log(err);
+    return res.status(500).json({ message: "Fetching movie failed", error: err.message });
   }
-
-  if (!movie) {
-    return res.status(404).json({ message: "Invalid Movie ID" });
-  }
-
-  return res.status(200).json({ movie });
 };
+
+// Export the verifyAdminToken middleware for use in routes
+export { verifyAdminToken };

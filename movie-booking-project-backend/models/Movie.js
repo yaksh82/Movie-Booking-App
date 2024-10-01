@@ -20,6 +20,7 @@ const movieSchema = new mongoose.Schema({
   },
   featured: {
     type: Boolean,
+    default: false, // Optional default value for 'featured'
   },
   bookings: [{ type: mongoose.Types.ObjectId, ref: "Booking" }],
   admin: {
@@ -27,6 +28,5 @@ const movieSchema = new mongoose.Schema({
     ref: "Admin",
     required: true,
   },
-});
-
+}, { timestamps: true }); 
 export default mongoose.model("Movie", movieSchema);

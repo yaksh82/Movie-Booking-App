@@ -7,6 +7,7 @@ import {
   Tabs,
   TextField,
   Toolbar,
+  CircularProgress,
 } from "@mui/material";
 import MovieCreationIcon from "@mui/icons-material/MovieCreation";
 import { getAllMovies } from "../../helpers/api-helpers";
@@ -14,28 +15,39 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../store/user-slice";
 import { adminActions } from "../../store/admin-slice";
+
 const Header = () => {
   const navigate = useNavigate();
   const [selectedMovie, setSelectedMovie] = useState("");
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(null); // Initialize to null
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
   const isUserLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const isAdminLoggedIn = useSelector((state) => state.admin.isLoggedIn);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    getAllMovies()
-      .then((data) => setData(data))
-      .catch((err) => console.log(err));
+    const fetchMovies = async () => {
+      try {
+        const data = await getAllMovies();
+        setData(data.movies); // Assuming data.movies holds the array of movies
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+    fetchMovies();
   }, []);
-  console.log(data);
+
   const handleChange = (e, val) => {
     setSelectedMovie(val);
     const movie = data.find((mov) => mov.title === val);
-    console.log(movie);
-    if (isUserLoggedIn) {
+    if (movie && isUserLoggedIn) {
       navigate(`/booking/${movie._id}`);
     }
   };
+
   return (
     <AppBar position="sticky" sx={{ bgcolor: "#2b2d42" }}>
       <Toolbar>
@@ -79,7 +91,6 @@ const Header = () => {
           >
             {!isAdminLoggedIn && !isUserLoggedIn && (
               <>
-                {" "}
                 <Tab to="/auth" LinkComponent={NavLink} label="Auth" />
                 <Tab to="/admin" LinkComponent={NavLink} label="Admin" />
               </>
@@ -87,8 +98,7 @@ const Header = () => {
 
             {isUserLoggedIn && (
               <>
-                {" "}
-                <Tab LinkComponent={Link} to="/user" label="user" />
+                <Tab LinkComponent={Link} to="/user" label="User" />
                 <Tab
                   onClick={() => dispatch(userActions.logout())}
                   LinkComponent={Link}
@@ -100,7 +110,6 @@ const Header = () => {
 
             {isAdminLoggedIn && (
               <>
-                {" "}
                 <Tab LinkComponent={Link} to="/profile" label="Profile" />
                 <Tab LinkComponent={Link} to="/add" label="Add Movie" />
                 <Tab
@@ -114,6 +123,13 @@ const Header = () => {
           </Tabs>
         </Box>
       </Toolbar>
+
+      {/* Loading Indicator */}
+      {loading && (
+        <Box display="flex" justifyContent="center" marginTop={2}>
+          <CircularProgress color="inherit" />
+        </Box>
+      )}
     </AppBar>
   );
 };

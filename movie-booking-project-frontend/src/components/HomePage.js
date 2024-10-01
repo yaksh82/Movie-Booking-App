@@ -54,10 +54,10 @@ const HomePage = () => {
           variant="outlined"
           sx={{ margin: "auto", color: "#2b2d42" }}
         >
-          {[1,2,3,4].map((item)=>(
-            <MovieItem key={item}/>))}
+
         </Button>
       </Box>
+      
     </Box>
   );
 };

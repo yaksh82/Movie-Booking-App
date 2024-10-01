@@ -2,15 +2,21 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { getAllMovies } from "../../helpers/api-helpers";
-import CradLayout from "../HomePage/CradLayout";
+import CradLayout from "../HomePage/CardLayout"; // Correcting the typo
 
 const AllMovies = () => {
-  const [movies, setMovies] = useState();
+  const [movies, setMovies] = useState([]); // Initialize with an empty array
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     getAllMovies()
-      .then((data) => setMovies(data))
-      .catch((err) => console.log(err));
+      .then((data) => setMovies(data.movies)) // Assuming the API returns movies in data.movies
+      .catch((err) => {
+        console.log(err);
+        setError("Failed to fetch movies.");
+      });
   }, []);
+
   return (
     <Box margin="auto" marginTop={4}>
       <Typography variant="h4" padding={2} textAlign="center">
@@ -24,17 +30,21 @@ const AllMovies = () => {
         flexWrap={"wrap"}
         gap={4}
       >
-        {movies &&
-          movies.map((movie, index) => (
-            <CradLayout
+        {error && <Typography color="error">{error}</Typography>}
+        {movies.length > 0 ? (
+          movies.map((movie) => (
+            <CardLayout
+              key={movie._id} // Use unique key instead of index
               id={movie._id}
               title={movie.title}
               releaseDate={movie.releaseDate}
               posterUrl={movie.posterUrl}
               description={movie.description}
-              key={index}
             />
-          ))}
+          ))
+        ) : (
+          <Typography>Loading movies...</Typography>
+        )}
       </Box>
     </Box>
   );

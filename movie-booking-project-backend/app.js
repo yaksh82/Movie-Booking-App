@@ -6,6 +6,7 @@ import adminRouter from "./routes/admin-routes";
 import movieRouter from "./routes/movie-routes";
 import bookingsRouter from "./routes/booking-routes";
 import cors from "cors";
+
 dotenv.config();
 const app = express();
 
@@ -17,11 +18,14 @@ app.use("/admin", adminRouter);
 app.use("/movie", movieRouter);
 app.use("/booking", bookingsRouter);
 
+// MongoDB connection
+const MONGO_URI = `mongodb+srv://yaksh82:${process.env.MONGODB_PASSWORD}@cluster0.h45tr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
 mongoose
-  .connect('mongodb+srv://yaksh82:${process.env.MONGODB_PASSWORD}@cluster0.h45tr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+  .connect(MONGO_URI)
   .then(() =>
     app.listen(5000, () =>
-      console.log("Connected To Database And Server is running")
+      console.log("Connected to Database and Server is running on port 5000")
     )
   )
   .catch((e) => console.log(e));

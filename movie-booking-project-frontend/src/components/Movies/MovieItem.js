@@ -3,35 +3,37 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardMedia,
   Typography,
 } from "@mui/material";
-import React from "react";
-import { Card, CardMedia, Typography, Button, CardContent } from "@mui/material"; // Include `CardContent` here
-
-import { Link } from "react-router-dom";
+import React from "react"; 
+import { Link } from "react-router-dom"; // Correct capitalization for Link
 
 const MovieItem = ({ title, releaseDate, posterUrl, id }) => {
   return (
     <Card sx={{ maxWidth: 345 }}>
-    <CardMedia
-      sx={{ height: 140 }}
-      image="/static/images/cards/contemplative-reptile.jpg"
-      title="green iguana"
-    />
-    <CardContent>
-      <Typography gutterBottom variant="h5" component="div">
-        Lizard
-      </Typography>
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        Lizards are a widespread group of squamate reptiles, with over 6,000
-        species, ranging across all continents except Antarctica
-      </Typography>
-    </CardContent>
-    <CardActions>
-      <Button size="small">Share</Button>
-      <Button size="small">Learn More</Button>
-    </CardActions>
-  </Card>
+      <CardMedia
+        sx={{ height: 140 }}
+        image={posterUrl} // Dynamically use posterUrl
+        title={title} // Dynamically use title for alt text
+      />
+      <img height={"50"} width="100%" src={posterUrl} alt={title} /> 
+      <CardContent>
+        <Typography gutterBottom variant="h5" component="div">
+          {title}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {new Date(releaseDate).toDateString()} {/* Correct Date formatting */}
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button size="small">Share</Button>
+        <Button size="small">Learn More</Button>
+        <Button size="small" component={Link} to={`/movies/${id}`}>
+          View Details {/* Example usage of Link to navigate to a movie's detail page */}
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 

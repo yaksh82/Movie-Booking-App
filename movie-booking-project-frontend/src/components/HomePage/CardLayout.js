@@ -8,7 +8,7 @@ import {
 import React from "react";
 import { Link } from "react-router-dom";
 
-const CradLayout = ({ title, description, releaseDate, posterUrl, id }) => {
+const CardLayout = ({ title, description, releaseDate, posterUrl, id }) => {
   return (
     <Card
       sx={{
@@ -21,11 +21,14 @@ const CradLayout = ({ title, description, releaseDate, posterUrl, id }) => {
       }}
     >
       <img
-        component="img"
-        height="50%"
+        height="50%" // Adjusted height
         width="100%"
         src={posterUrl}
         alt={title}
+        onError={(e) => {
+          e.target.onerror = null; // prevents looping
+          e.target.src = "path/to/default/image.jpg"; // Set a default image
+        }}
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
@@ -57,4 +60,4 @@ const CradLayout = ({ title, description, releaseDate, posterUrl, id }) => {
   );
 };
 
-export default CradLayout;
+export default CardLayout; // Fixed the export name
