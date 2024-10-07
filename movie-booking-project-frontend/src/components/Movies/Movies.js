@@ -4,18 +4,12 @@ import { getAllMovies } from "../../api-helpers/api-helpers";
 import MovieItem from "./MovieItem";
 
 const Movies = () => {
-  const [movies, setMovies] = useState([]);
-  const [error, setError] = useState(null);
-
+  const [movies, setMovies] = useState();
   useEffect(() => {
     getAllMovies()
       .then((data) => setMovies(data.movies))
-      .catch((err) => {
-        console.log(err);
-        setError("Failed to fetch movies");
-      });
+      .catch((err) => console.log(err));
   }, []);
-
   return (
     <Box margin={"auto"} marginTop={4}>
       <Typography
@@ -37,24 +31,16 @@ const Movies = () => {
         justifyContent="flex-start"
         flexWrap={"wrap"}
       >
-        {error && (
-          <Typography variant="h6" color="error">
-            {error}
-          </Typography>
-        )}
-        {movies && movies.length > 0 ? (
-          movies.map((movie) => (
+        {movies &&
+          movies.map((movie, index) => (
             <MovieItem
-              key={movie._id}  // Use unique key
+              key={index}
               id={movie._id}
               posterUrl={movie.posterUrl}
               releaseDate={movie.releaseDate}
               title={movie.title}
             />
-          ))
-        ) : (
-          !error && <Typography>Loading movies...</Typography>
-        )}
+          ))}
       </Box>
     </Box>
   );

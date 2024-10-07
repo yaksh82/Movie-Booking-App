@@ -1,6 +1,7 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import Bookings from "../models/Bookings";
+import Bookings from "../models/Bookings.js";
+
 export const getAllUsers = async (req, res, next) => {
   let users;
   try {
@@ -14,7 +15,7 @@ export const getAllUsers = async (req, res, next) => {
   return res.status(200).json({ users });
 };
 
-export const singup = async (req, res, next) => {
+export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
   if (
     !name &&

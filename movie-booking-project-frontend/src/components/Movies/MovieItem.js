@@ -3,34 +3,49 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardMedia,
   Typography,
 } from "@mui/material";
-import React from "react"; 
-import { Link } from "react-router-dom"; // Correct capitalization for Link
+import React from "react";
+import { Link } from "react-router-dom";
 
 const MovieItem = ({ title, releaseDate, posterUrl, id }) => {
   return (
-    <Card sx={{ maxWidth: 345 }}>
-      <CardMedia
-        sx={{ height: 140 }}
-        image={posterUrl} // Dynamically use posterUrl
-        title={title} // Dynamically use title for alt text
-      />
-      <img height={"50"} width="100%" src={posterUrl} alt={title} /> 
+    <Card
+      sx={{
+        margin: 2,
+        width: 250,
+        height: 320,
+        borderRadius: 5,
+        ":hover": {
+          boxShadow: "10px 10px 20px #ccc",
+        },
+      }}
+    >
+      <img height={"50%"} width="100%" src={posterUrl} alt={title} />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {title}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {new Date(releaseDate).toDateString()} {/* Correct Date formatting */}
+        <Typography variant="body2" color="text.secondary">
+          {new Date(releaseDate).toDateString()}
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small">Share</Button>
-        <Button size="small">Learn More</Button>
-        <Button size="small" component={Link} to={`/movies/${id}`}>
-          View Details {/* Example usage of Link to navigate to a movie's detail page */}
+        <Button
+          variant="contained"
+          fullWidth
+          LinkComponent={Link}
+          to={`/booking/${id}`}
+          sx={{
+            margin: "auto",
+            bgcolor: "#2b2d42",
+            ":hover": {
+              bgcolor: "#121217",
+            },
+          }}
+          size="small"
+        >
+          Book
         </Button>
       </CardActions>
     </Card>
